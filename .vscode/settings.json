@@ -1,0 +1,65 @@
+{
+    "terminal.integrated.allowChords": false,
+
+    "files.exclude": {
+        "**/vendor/": true,
+    },
+    "files.watcherExclude": {
+    },
+    "search.exclude": {
+        "build/": true,
+    },
+
+    // Golang
+    "go.useLanguageServer": true,
+    "go.formatTool": "goimports",
+    "go.lintOnSave": "package",
+    "go.lintTool": "revive",
+    "go.lintFlags": [
+        "-config=${workspaceFolder}/revive.toml",
+        "-exclude=vendor/..."
+    ],
+    "go.vetOnSave": "workspace",
+    "go.vetFlags": [
+		"-all"
+	],
+    "[go]": {
+        "files.insertFinalNewline": true,
+        "files.trimTrailingWhitespace": true,
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.snippetSuggestions": "bottom"
+    },
+    "[go.mod]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    "gopls": {
+        "usePlaceholders": true,
+        "staticcheck": false
+    },
+
+    // YAML
+    "yaml.format.enable": true,
+    "yaml.validate": true,
+    "yaml.hover": true,
+    "yaml.completion": true,
+    "yaml.schemaStore.enable": true,
+    "yaml.schemas": {
+        // Taskfile
+        "https://taskfile.dev/schema.json": [
+            "**/Taskfile.yml",
+            "**/taskfile.yml",
+            "**/Taskfile.yaml",
+            "**/taskfile.yaml",
+            "**/Taskfile.dist.yml",
+            "**/taskfile.dist.yml",
+            "**/Taskfile.dist.yaml",
+            "**/taskfile.dist.yaml",
+        ]
+    }
+}

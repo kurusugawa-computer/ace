@@ -1,0 +1,28 @@
+{
+    "useGitignore": true,
+    "ignorePaths": [
+        ".git/objects/**",
+        "**/.gitignore",
+        ".devcontainer/**",
+        ".vscode/**",
+        "**/vendor/**",
+        "**/go.mod",
+        "**/go.sum"
+    ],
+    "words": [
+        "denisbrodbeck",
+        "godotenv",
+        "jsonschema",
+        "kurusugawa",
+        "lazycrypto",
+        "ldflags",
+        "machineid",
+        "mitchellh",
+        "modelcontextprotocol",
+        "OpenAIAPIKey",
+        "Phantomizer",
+        "Streamable",
+        "thamaji",
+        "urfave"
+    ]
+}

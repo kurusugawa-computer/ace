@@ -1,0 +1,20 @@
+version: "3"
+
+vars:
+  CLI_NAME: ace
+  CLI_VERSION: v0.0.1
+
+tasks:
+  build:
+    cmds:
+      - |
+        mkdir -p build
+        go run github.com/mitchellh/gox@master \
+          -arch "amd64 arm64" \
+          -os "linux darwin windows" \
+          -ldflags "-s -w -X main.version={{.CLI_VERSION}}" \
+          -output build/{{.CLI_NAME}}_{{`{{.OS}}`}}_{{`{{.Arch}}`}}/{{.CLI_NAME}}
+        cd build
+        for dir in $(find -maxdepth 1 -type d -name "{{.CLI_NAME}}_*"); do
+          tar czf ${dir}.tar.gz ${dir}
+        done

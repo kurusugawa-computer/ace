@@ -1,0 +1,141 @@
+package agent
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"path/filepath"
+	"strings"
+
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
+	"github.com/thamaji/codex-go"
+)
+
+type RunConfig struct {
+	APIKey                  string
+	SubAgentMCPServerConfig func(subAgentName string) (map[string]any, error)
+	LogLevel                string // error, warn, info, debug, trace, off
+	LogWriter               io.Writer
+}
+
+func (agent *Agent) Run(workdir string, input map[string]any, config *RunConfig) (any, error) {
+	// 作業ディレクトリの絶対パスを取得
+	workdirAbsPath, err := filepath.Abs(workdir)
+	if err != nil {
+		return nil, err
+	}
+
+	// Codex の Config を構築
+	codexConfig := map[string]any{}
+	if agent.Config != nil {
+		// deep copy
+		jsonConfig, _ := json.Marshal(agent.Config)
+		_ = json.Unmarshal(jsonConfig, &codexConfig)
+	}
+	for _, subAgentName := range agent.SubAgents {
+		mcpServerConfig, err := config.SubAgentMCPServerConfig(subAgentName)
+		if err != nil {
+			return nil, err
+		}
+
+		codexConfig["mcp_servers."+subAgentName] = mcpServerConfig
+	}
+
+	// プロンプトの構築
+	prompt := &strings.Builder{}
+	if err := agent.PromptTemplate.Execute(prompt, input); err != nil {
+		return nil, err
+	}
+
+	// プロンプトにサブエージェントを呼び出す指示を追加
+	if len(agent.SubAgents) > 0 {
+		fmt.Fprintln(prompt, "")
+		for _, subAgentName := range agent.SubAgents {
+			fmt.Fprintln(prompt, "use "+subAgentName)
+		}
+	}
+
+	// プロンプトに出力形式の指定を追加
+	outputSchemaJSON, err := agent.OutputSchema.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	fmt.Fprintln(prompt, "")
+	fmt.Fprintln(prompt, "なお、出力形式は以下の JSON Schema に厳格に従うこと。")
+	fmt.Fprintln(prompt, string(outputSchemaJSON))
+
+	// Codex を実行して回答を取得
+	var options []codex.CodexOption
+	if config.LogWriter != nil && config.LogLevel != "off" {
+		options = append(options, codex.WithLogger(config.LogWriter, config.LogLevel))
+	}
+	instance := codex.New(options...)
+	ctx := context.Background()
+	if err := instance.Login(ctx, config.APIKey); err != nil {
+		return nil, err
+	}
+	answer, err := instance.Invoke(
+		ctx,
+		prompt.String(),
+		codex.WithBaseInstructions(agent.Instruction),
+		codex.WithCwd(workdirAbsPath),
+		codex.WithApprovalPolicy(agent.ApprovalPolicy),
+		codex.WithSandbox(agent.Sandbox),
+		codex.WithConfig(codexConfig),
+	)
+	if err != nil {
+		return nil, err
+	}
+	answer = strings.TrimSpace(answer)
+
+	// 回答が出力形式に従っているかチェック
+	var output any
+	if err := json.Unmarshal([]byte(answer), &output); err == nil {
+		resolved, err := agent.OutputSchema.Resolve(nil)
+		if err != nil {
+			return nil, err
+		}
+		if resolved.Validate(output) == nil {
+			// 出力形式に従っていたら、そのまま返す
+			return output, nil
+		}
+	}
+
+	// 回答の内容を AI で出力形式に合わせて整形する
+	client := openai.NewClient(option.WithAPIKey(config.APIKey))
+	chatCompletion, err := client.Chat.Completions.New(
+		ctx,
+		openai.ChatCompletionNewParams{
+			Model:       openai.ChatModelGPT5Nano,
+			Temperature: openai.Float(1),
+			ResponseFormat: openai.ChatCompletionNewParamsResponseFormatUnion{
+				OfJSONSchema: &openai.ResponseFormatJSONSchemaParam{
+					JSONSchema: openai.ResponseFormatJSONSchemaJSONSchemaParam{
+						Name:        "parse",
+						Description: openai.String("ユーザーの入力した文章を解釈します。"),
+						Schema:      agent.OutputSchema,
+						Strict:      openai.Bool(true),
+					},
+				},
+			},
+			Messages: []openai.ChatCompletionMessageParamUnion{
+				openai.SystemMessage("ユーザーの入力した文章をJSON Schemaに従って出力してください。"),
+				openai.UserMessage(answer),
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	if chatCompletion == nil || len(chatCompletion.Choices) == 0 {
+		return nil, errors.New("invalid format, openai chat completions response")
+	}
+	if err := json.Unmarshal([]byte(chatCompletion.Choices[0].Message.Content), &output); err != nil {
+		return nil, errors.New("invalid format, openai chat completions response")
+	}
+
+	return output, nil
+}

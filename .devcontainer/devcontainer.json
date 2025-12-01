@@ -1,0 +1,31 @@
+{
+	"name": "${localWorkspaceFolderBasename}",
+	"dockerComposeFile": "compose.yaml",
+	"service": "dev",
+	"containerUser": "vscode",
+	"remoteUser": "vscode",
+	"updateRemoteUserUID": true,
+	"workspaceFolder": "/workspace",
+	"features": {
+		"ghcr.io/thamaji/devcontainer-features/lefthook:latest": {},
+		"ghcr.io/thamaji/devcontainer-features/gitleaks:latest": {},
+		"ghcr.io/thamaji/devcontainer-features/codex-cli:latest": {},
+		"ghcr.io/thamaji/devcontainer-features/task:latest": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"golang.go",
+				"redhat.vscode-yaml",
+				"streetsidesoftware.code-spell-checker"
+			],
+			"settings": {
+				"remote.autoForwardPortsSource": "output",
+				"files.exclude": {
+					".devcontainer/.bash": true,
+					".devcontainer/.go": true
+				}
+			}
+		}
+	}
+}
