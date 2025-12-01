@@ -98,10 +98,10 @@ agents:
           - fetch_content
 ```
 
-この YAML ファイルが `examples/sample.yaml` に保存されているとき、定義した AI エージェントを実行するには、次のコマンドを実行します。
+この YAML ファイルが `examples/sample.yaml` に保存されているとき、定義した `root` エージェントを実行するには、次のコマンドを実行します。
 
 ```bash
-ace exec -c example/sample.yaml question=明日の名古屋の天気は？
+ace exec -c example/sample.yaml root question=明日の名古屋の天気は？
 ```
 
 実行結果は以下のような JSON 形式で出力されます。
