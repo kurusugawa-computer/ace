@@ -1,4 +1,4 @@
-package agent
+package agents
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 
 type RunConfig struct {
 	APIKey                  string
-	SubAgentMCPServerConfig func(subAgentName string) (map[string]any, error)
+	SubagentMCPServerConfig func(subAgent *SubAgent) (map[string]any, error)
 	LogLevel                string // error, warn, info, debug, trace, off
 	LogWriter               io.Writer
 }
@@ -29,19 +29,14 @@ func (agent *Agent) Run(workdir string, input map[string]any, config *RunConfig)
 	}
 
 	// Codex の Config を構築
-	codexConfig := map[string]any{}
-	if agent.Config != nil {
-		// deep copy
-		jsonConfig, _ := json.Marshal(agent.Config)
-		_ = json.Unmarshal(jsonConfig, &codexConfig)
-	}
-	for _, subAgentName := range agent.SubAgents {
-		mcpServerConfig, err := config.SubAgentMCPServerConfig(subAgentName)
+	codexConfig := agent.Config.Clone()
+	for _, subAgent := range agent.SubAgents {
+		mcpServerConfig, err := config.SubagentMCPServerConfig(subAgent)
 		if err != nil {
 			return nil, err
 		}
 
-		codexConfig["mcp_servers."+subAgentName] = mcpServerConfig
+		codexConfig["mcp_servers."+subAgent.Name] = mcpServerConfig
 	}
 
 	// プロンプトの構築
@@ -50,13 +45,14 @@ func (agent *Agent) Run(workdir string, input map[string]any, config *RunConfig)
 		return nil, err
 	}
 
+	// TODO: これをやってしまうと、サブエージェントの利用を強制してしまう（必要がなくても使ってしまう）ことがある。やらないほうがよいかもしれない。要件等。いったんやらないでおく。
 	// プロンプトにサブエージェントを呼び出す指示を追加
-	if len(agent.SubAgents) > 0 {
-		fmt.Fprintln(prompt, "")
-		for _, subAgentName := range agent.SubAgents {
-			fmt.Fprintln(prompt, "use "+subAgentName)
-		}
-	}
+	// if len(agent.SubAgents) > 0 {
+	// 	fmt.Fprintln(prompt, "")
+	// 	for _, subAgent := range agent.SubAgents {
+	// 		fmt.Fprintln(prompt, "use "+subAgent.Name)
+	// 	}
+	// }
 
 	// プロンプトに出力形式の指定を追加
 	outputSchemaJSON, err := agent.OutputSchema.MarshalJSON()

@@ -37,4 +37,31 @@ ENV GOROOT=/usr/local/go \
     GOPATH=/home/vscode/go \
     PATH=/home/vscode/go/bin:/usr/local/go/bin:${PATH}
 
+# install nodejs for testing MCP Server
+ARG NODE_VERSION=22.21.0
+RUN --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        curl \
+        tar \
+        xz-utils \
+    && curl -fsSL --compressed "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" | tar xJ -C /usr/local
+ENV PATH=/usr/local/node-v${NODE_VERSION}-linux-x64/bin:${PATH}
+
 USER vscode
+
+# install uv for testing MCP Server
+ARG UV_VERSION=0.9.13
+RUN --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    sudo apt-get update \
+    && sudo apt-get install -y --no-install-recommends \
+        curl \
+        ca-certificates \
+    && curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh \
+    && echo 'eval "$(uv generate-shell-completion bash)"' >> /home/vscode/.bashrc \
+    && echo 'eval "$(uvx --generate-shell-completion bash)"' >> /home/vscode/.bashrc
+ENV PATH=/home/vscode/.local/bin/:${PATH} \
+    UV_NO_CACHE=1 \
+    UV_LINK_MODE=copy

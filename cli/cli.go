@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/kurusugawa-computer/ace/agents"
 	"github.com/urfave/cli/v3"
 )
 
@@ -28,8 +29,8 @@ func New(appName string, version string, title string) *cli.Command {
 type subCommand func(appName string, version string) *cli.Command
 
 // サブエージェントを実行するMCP Serverの起動方法を返す関数を返す関数
-func subAgentMCPServerConfig(configPath string, workdir string, apiKey string) func(subAgentName string) (map[string]any, error) {
-	return func(subAgentName string) (map[string]any, error) {
+func subAgentMCPServerConfig(configPath string, workdir string, apiKey string) func(subAgent *agents.SubAgent) (map[string]any, error) {
+	return func(subAgent *agents.SubAgent) (map[string]any, error) {
 		// 設定ファイルの絶対パスを取得
 		configAbsPath, err := filepath.Abs(configPath)
 		if err != nil {
@@ -51,11 +52,13 @@ func subAgentMCPServerConfig(configPath string, workdir string, apiKey string) f
 				configAbsPath,
 				"--workdir",
 				workdirAbsPath,
-				subAgentName,
+				subAgent.Name,
 			},
 			"env": map[string]any{
 				"OPENAI_API_KEY": apiKey,
 			},
+			"startup_timeout_sec": 30,
+			"tool_timeout_sec":    subAgent.TimeoutSec,
 		}
 
 		return config, nil

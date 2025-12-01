@@ -1,0 +1,51 @@
+config:
+  model_provider: openai
+  model: gpt-5-mini
+  model_reasoning_effort: low
+  model_verbosity: low
+
+agents:
+  root:
+    description: |
+      ユーザーの質問に回答します。
+    instruction: |
+      ユーザーの質問に対して元気よく回答すること。
+    prompt_template: |
+      {{.question}}
+    input_schema:
+      question:
+        type: string
+    output_schema:
+      answer:
+        type: string
+    approval_policy: untrusted
+    sub_agents:
+      - weather
+
+  weather:
+    description: |
+      天気情報を調べます。
+    instruction: |
+      以下のツールを使用して、天気情報を検索してユーザーの質問に回答しなさい。
+      - search
+      - fetch_content
+    prompt_template: |
+      {{.location}} の {{.time}} の天気について Web 検索して回答しなさい。
+    input_schema:
+      location:
+        type: string
+        description: 地域
+      time:
+        type: string
+        description: 日時
+    output_schema:
+      result:
+        type: string
+        description: 天気情報
+    mcp_servers:
+      duckduckgo:
+        command: uvx
+        args: ["duckduckgo-mcp-server"]
+        enabled_tools:
+          - search
+          - fetch_content

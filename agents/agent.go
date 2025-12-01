@@ -1,4 +1,4 @@
-package agent
+package agents
 
 import (
 	"html/template"
@@ -15,6 +15,11 @@ type Agent struct {
 	OutputSchema   *jsonschema.Schema
 	ApprovalPolicy string
 	Sandbox        string
-	Config         map[string]any
-	SubAgents      []string
+	Config         CodexConfig
+	SubAgents      []*SubAgent
+}
+
+type SubAgent struct {
+	Name       string
+	TimeoutSec int
 }

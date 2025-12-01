@@ -1,4 +1,4 @@
-package agent
+package agents
 
 import (
 	"html/template"
@@ -36,6 +36,15 @@ func Build(config *Config) (*Agent, error) {
 		return nil, err
 	}
 
+	// サブエージェント
+	subAgents := make([]*SubAgent, 0, len(config.SubAgents))
+	for _, subAgentConfig := range config.SubAgents {
+		subAgents = append(subAgents, &SubAgent{
+			Name:       subAgentConfig.Name,
+			TimeoutSec: subAgentConfig.TimeoutSec,
+		})
+	}
+
 	// 構築したエージェントを返す
 	agent := &Agent{
 		Name:           config.Name,
@@ -47,7 +56,7 @@ func Build(config *Config) (*Agent, error) {
 		ApprovalPolicy: config.ApprovalPolicy,
 		Sandbox:        config.Sandbox,
 		Config:         config.Config,
-		SubAgents:      config.SubAgents,
+		SubAgents:      subAgents,
 	}
 	return agent, nil
 }

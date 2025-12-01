@@ -2,21 +2,14 @@ package app
 
 import (
 	"context"
-	"errors"
 
-	ag "github.com/kurusugawa-computer/ace/app/agent"
+	"github.com/kurusugawa-computer/ace/agents"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 func (app *App) RunMCPServer(agentName string, workdir string) error {
-	// エージェントのConfigを取得
-	agentConfig, ok := app.config.Agents[agentName]
-	if !ok {
-		return errors.New("no such agent: " + agentName)
-	}
-
 	// エージェントのビルド
-	agent, err := ag.Build(agentConfig)
+	agent, err := app.buildAgent(agentName)
 	if err != nil {
 		return err
 	}
@@ -41,9 +34,9 @@ func (app *App) RunMCPServer(agentName string, workdir string) error {
 			output, err := agent.Run(
 				workdir,
 				input,
-				&ag.RunConfig{
+				&agents.RunConfig{
 					APIKey:                  app.apiKey,
-					SubAgentMCPServerConfig: app.subAgentMCPServerConfig,
+					SubagentMCPServerConfig: app.subAgentMCPServerConfig,
 					LogLevel:                app.logLevel,
 					LogWriter:               app.logWriter,
 				},

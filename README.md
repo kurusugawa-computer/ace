@@ -11,12 +11,16 @@ ACE は、AI エージェントを YAML ファイルで簡潔に定義し、CLI 
 ACE は、AI エージェントの定義・実行を効率化するためのコマンドラインツールです。  
 エージェントの動作ロジック、入力・出力仕様、モデル設定などを YAML で記述するだけで、柔軟なエージェント実行環境を構築できます。
 
+AI エージェントの定義がひとつの YAML ファイルで完結するので、YAML ファイルさえ共有してしまえば、構築した AI エージェントをチームで共有することも簡単です。
+
 ## Installation
 
 ### 必要環境
 
 ACE は内部的に OpenAI の Codex CLI を利用しています。  
 `codex` コマンドにパスが通っている必要があります。
+
+また、必要に応じて MCP Server の実行環境（npm や uv など）を用意してください。
 
 ### インストール手順
 
@@ -33,16 +37,26 @@ ACE の実行には **OpenAI API Key** が必要です。以下のいずれか�
 
 ## Usage
 
-### AI エージェント定義ファイル（YAML）
+ACE では、AI エージェントを YAML ファイルで定義します。  
+YAML ファイルのスキーマは [app/config.go#L11](https://github.com/kurusugawa-computer/ace/blob/main/app/config.go#L11) を参照してください。
 
-ACE では、YAML 形式でエージェントを定義します。  
-以下はサンプルの定義です。
+次の YAML ファイルは、ユーザーの質問にたいして元気よく回答する AI エージェントです。  
+ユーザーが天気について質問すると、この AI エージェントは weather サブエージェントを実行して天気情報を取得します。  
+weather エージェントは MCP Server として Web 検索を行うツールを与えられています。
 
 ```yaml
+config:
+  model_provider: openai
+  model: gpt-5-mini
+  model_reasoning_effort: low
+  model_verbosity: low
+
 agents:
   root:
-    description: テスト
-    instruction: 元気よく回答すること
+    description: |
+      ユーザーの質問に回答します。
+    instruction: |
+      ユーザーの質問に対して元気よく回答すること。
     prompt_template: |
       {{.question}}
     input_schema:
@@ -51,20 +65,17 @@ agents:
     output_schema:
       answer:
         type: string
-    approval_policy: never
-    sandbox: read-only
-    config:
-      model: gpt-5-nano
-      model_reasoning_effort: low
-      model_verbosity: high
-      tools:
-        web_search: false
+    approval_policy: untrusted
     sub_agents:
       - weather
 
   weather:
-    description: 天気情報を調べます
-    instruction: 何を聞かれても「嵐」とだけ回答すること
+    description: |
+      天気情報を調べます。
+    instruction: |
+      以下のツールを使用して、天気情報を検索してユーザーの質問に回答しなさい。
+      - search
+      - fetch_content
     prompt_template: |
       {{.location}} の {{.time}} の天気について Web 検索して回答しなさい。
     input_schema:
@@ -78,67 +89,36 @@ agents:
       result:
         type: string
         description: 天気情報
-    approval_policy: never
-    sandbox: read-only
-    config:
-      model: gpt-5-nano
-      model_reasoning_effort: low
-      model_verbosity: low
-      tools:
-        web_search: false
+    mcp_servers:
+      duckduckgo:
+        command: uvx
+        args: ["duckduckgo-mcp-server"]
+        enabled_tools:
+          - search
+          - fetch_content
 ```
 
-#### ポイント
-
-1. **agents**  
-   エージェント名をキーとする辞書形式で定義します。  
-   キーがエージェント名、値がその設定です。
-
-2. **instruction / prompt_template**  
-   エージェントの振る舞いを決定する主要要素です。  
-   input_schema で定義した値は prompt_template 内で {{.key}} として参照できます。  
-   例：`ace exec root question="今日の名古屋の天気は？"`  
-   この場合、{{.question}} には "今日の名古屋の天気は？" が展開されます。  
-
-3. **input_schema / output_schema**  
-   JSON Schema を YAML で記述した形式で指定します。  
-   トップレベルにはオブジェクトのみを使用できます（配列・文字列・数値の直接指定は不可）。
-
-4. **description**  
-   サブエージェントとして呼び出される場合、親エージェントに対する tool description として利用されます。  
-    用途が明確にわかる形で記述してください。
-
-5. **approval_policy / sandbox**  
-   Codex の approval_policy、sandbox の値を指定します。  
-   [Codex のドキュメント](https://github.com/openai/codex/blob/main/docs/config.md) を参照してください。
-
-6. **config**  
-   Codex の config.toml の YAML 表現です。  
-   [Codex のドキュメント](https://github.com/openai/codex/blob/main/docs/config.md) を参照してください。
-
-### 実行例
-
-次の例は `agent.yaml` に定義されている `root` エージェントを、`question=今日の名古屋の天気は？` で実行します。
+この YAML ファイルが `examples/sample.yaml` に保存されているとき、定義した AI エージェントを実行するには、次のコマンドを実行します。
 
 ```bash
-ace exec -c agent.yaml root question=今日の名古屋の天気は？
+ace exec -c example/sample.yaml question=明日の名古屋の天気は？
 ```
 
-実行結果は以下のような JSON 形式で出力されます。（output_schema で指定できます。）
+実行結果は以下のような JSON 形式で出力されます。
 
 ```json
 {
-  "answer": "名古屋の明日の天気は嵐の見込みです。強風と大雨に備え、傘や雨具、防風対策を準備してください。最新の天気情報をこまめにご確認ください。"
+  "answer": "明日の名古屋は晴のち雪の予報です！予想最高気温は13℃、最低気温は9℃。降水確率は午前〜昼が約30%、夕方以降は50%と上がります。風は北西で最大7m/sほどです。出かける際は念のため防寒と雨具をお持ちくださいね！"
 }
 ```
 
-詳細は `ace --help` や `ace exec --help` を参照してください。
+コマンドの詳細は `ace --help` や `ace exec --help` を参照してください。
 
 ### MCP Server としての利用
 
-次のように呼び出すと、ace を MCP Server（STDIO 形式）として起動できます。  
-この場合、`root` エージェントが `root` ツールとして MCP Client へ提供されます。
+mcp-server サブコマンドを実行すると、ACE を MCP Server（STDIO 形式）として起動できます。  
+次のコマンドでは、YAML ファイルに定義されている `root` エージェントを、`root` ツールとして MCP Client へ提供します。
 
 ```bash
-ace mcp-server -c agent.yaml root
+ace mcp-server -c example/sample.yaml root
 ```

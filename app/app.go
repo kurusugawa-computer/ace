@@ -1,18 +1,23 @@
 package app
 
-import "io"
+import (
+	"io"
+
+	"github.com/kurusugawa-computer/ace/agents"
+)
 
 type App struct {
 	config                  *Config
 	apiKey                  string
-	subAgentMCPServerConfig func(subAgentName string) (map[string]any, error)
-	logWriter               io.Writer
-	logLevel                string // error, warn, info, debug, trace, off
+	subAgentMCPServerConfig func(subAgent *agents.SubAgent) (map[string]any, error)
+
+	logWriter io.Writer
+	logLevel  string // error, warn, info, debug, trace, off
 }
 
 type AppOption func(*App)
 
-func New(config *Config, apiKey string, subAgentMCPServerConfig func(subAgentName string) (map[string]any, error), options ...AppOption) *App {
+func New(config *Config, apiKey string, subAgentMCPServerConfig func(subAgent *agents.SubAgent) (map[string]any, error), options ...AppOption) *App {
 	app := &App{
 		config:                  config,
 		apiKey:                  apiKey,

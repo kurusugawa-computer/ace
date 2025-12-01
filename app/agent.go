@@ -1,20 +1,12 @@
 package app
 
 import (
-	"errors"
-
-	ag "github.com/kurusugawa-computer/ace/app/agent"
+	"github.com/kurusugawa-computer/ace/agents"
 )
 
 func (app *App) RunAgent(agentName string, workdir string, input map[string]any) (any, error) {
-	// エージェントのConfigを取得
-	agentConfig, ok := app.config.Agents[agentName]
-	if !ok {
-		return nil, errors.New("no such agent: " + agentName)
-	}
-
 	// エージェントのビルド
-	agent, err := ag.Build(agentConfig)
+	agent, err := app.buildAgent(agentName)
 	if err != nil {
 		return nil, err
 	}
@@ -23,9 +15,9 @@ func (app *App) RunAgent(agentName string, workdir string, input map[string]any)
 	output, err := agent.Run(
 		workdir,
 		input,
-		&ag.RunConfig{
+		&agents.RunConfig{
 			APIKey:                  app.apiKey,
-			SubAgentMCPServerConfig: app.subAgentMCPServerConfig,
+			SubagentMCPServerConfig: app.subAgentMCPServerConfig,
 			LogLevel:                app.logLevel,
 			LogWriter:               app.logWriter,
 		},
