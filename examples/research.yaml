@@ -1,0 +1,342 @@
+# usage:
+#   ace -c research.yaml root \
+#     keyword="調査対象" \
+#     description="調査対象に関する補足事項" \
+#     outputDir=path/to/outputDir
+#
+# description:
+#   調査対象についてインターネット上の各リソースを調査し、
+#   調査結果をレポートとして出力します。
+#
+# requirements:
+#   - codex にパスが通っていること
+#   - uv, npx にパスが通っていること
+#
+
+config:
+  model_provider: openai
+  model: gpt-5.1-codex-mini
+  model_reasoning_effort: medium
+
+vars:
+  role: |
+    あなたは優秀なリサーチャーです。
+    与えられたテーマについて、正確かつ最新の情報を幅広く調査し、信頼性の高い情報源を用いて整理・分析します。
+  instruction: |
+    行動指針
+    - 重要事項は具体例や利用シーンを伴って説明し、理解の精度を高めよ。
+    - 出力は編集・転用しやすい形式（コードブロック、表形式、箇条書き）を基本とせよ。
+    - 読みやすさと活用性を両立する構造化を徹底せよ。
+    - 比較や評価は可能な限り数値化し、定量的指標を最優先で提示せよ。
+    - 数値化困難な場合は代替指標を提案し、それでも不足する場合は「不明」と明示せよ。
+    - 数値やデータが不足する場合は必ずWeb検索を用い、信頼できる複数情報源から最新かつ正確な数値を収集せよ。
+    - 収集した情報の信頼性や矛盾、情報の更新日時なども明示せよ。
+    - 数値は表形式など構造化した形で示し、分かりやすく加工・解説せよ。
+    - どんな状況でも、検証・定量化・根拠付けを伴う厳密な回答を最優先とし、期待値に甘えた曖昧な出力を許すな。
+  research_rule: |
+    調査結果の回答ルール
+    - 調査したすべての情報を漏れなく網羅的に記載すること。
+    - 根拠となる事実を可能な限り定量的なデータで示すこと。
+    - すべての調査結果に出典・引用元を付与すること。
+
+agents:
+  root:
+    description: |
+      キーワードについて詳細な調査を行い、指定されたディレクトリ以下に report.md を作成します。
+    instruction: |
+      {{.role}}
+      ユーザーは未知のキーワードについて調べものをしています。
+      ユーザーの指定するキーワードについて徹底的に調査しなさい。
+
+      {{.instruction}}
+    prompt_template: |
+      ユーザーの指定するキーワードについて、ワークフローに従い徹底的に調査しなさい。
+      ワークフローのすべてをユーザーに指示を仰ぐことなく自律的に完遂すること。
+
+      <ワークフロー>
+      1. research_web を用いて公式情報や一次情報を調査し、概要を把握しなさい。
+         調査結果は日本語で {{.outputDir}}/info.md としてファイルに保存すること。
+
+      2. もう一度 research_web を用いて、概要をもとにさらに詳細な周辺情報を収集しなさい。
+         収集した情報は日本語で {{.outputDir}}/info.md ファイルに追記しなさい。
+
+      3. {{.outputDir}}/info.md をもとにさらに詳細な調査をするために、次のツールを用いた調査計画を計画しなさい。
+         なお、調査計画には、特徴の調査、系譜・由来の調査、競合と競合に対する優位性の調査、コミュニティからの評価の調査、用語集の作成を含めること。
+         調査計画は日本語で {{.outputDir}}/plan.md としてファイルに保存すること。
+         - research_arxiv
+         - research_community
+         - research_github
+         - research_hackernews
+         - research_reddit
+         - research_web
+
+      4. {{.outputDir}}/plan.md に基づき調査計画を実行しなさい。
+         各調査の実施結果は日本語で {{.outputDir}} ディレクトリ以下に適当な名前のマークダウンファイルを作成して保存すること。
+
+      5. 調査計画の実施結果を受けて、さらに深く・広く調査すべきことを追加の調査計画として計画しなさい。
+         追加の調査計画は日本語で {{.outputDir}}/plan2.md としてファイルに保存すること。
+
+      6. {{.outputDir}}/plan2.md に基づき追加の調査計画を実行しなさい。
+         各調査の実施結果は日本語で {{.outputDir}} ディレクトリ以下に適当な名前のマークダウンファイルを作成して保存すること。
+
+      7. これまでに作成したすべてのファイルに記載されている情報を漏れなく内包した
+         詳細かつ精密な調査レポートを執筆しなさい。
+         このレポートは最終成果物であり、学術論文に匹敵する高い精度と情報量が求められている。
+         最低でも200行以上の情報量を期待している。
+         レポートは日本語で {{.outputDir}}/report.md にファイルとして保存すること。
+         - 他の資料やファイルへの参照・リンクは使用せず、{{.outputDir}}/report.md だけを見れば
+           すべての情報が把握できるように情報を展開すること。
+         - 調査したすべての情報を漏れなく網羅的に記載すること。
+         - 根拠となる事実を可能な限り定量的なデータで示すこと。
+         - すべての調査結果に出典・引用元を付与すること。
+      </ワークフロー>
+
+      <キーワード>
+      {{.keyword}}
+      </キーワード>
+    input_schema:
+      keyword:
+        type: string
+        description: 調査対象のキーワード
+      description:
+        type: string
+        description: 調査対象のキーワードに対する補足説明
+        default: ""
+      outputDir:
+        type: string
+        description: 出力先ディレクトリのパス
+    output_schema:
+      result:
+        type: string
+        description: 調査の結果をユーザー向けに報告する簡潔なメッセージ
+      is_error:
+        type: boolean
+        description: 調査が成功した場合は true、失敗した場合は false
+    sandbox: workspace-write
+    sub_agents:
+      - research_arxiv
+      - research_community
+      - research_github
+      - research_hackernews
+      - research_reddit
+      - research_web
+
+  research_arxiv:
+    description: |
+      質問内容について arXiv 上の論文を調査して回答します。
+    instruction: |
+      {{.role}}
+      ユーザーの質問に対して arXiv 上の論文を徹底的に調査して、調査結果を報告しなさい。
+
+      {{.research_rule}}
+
+      {{.instruction}}
+    prompt_template: |
+      <質問内容>
+      {{.question}}
+      </質問内容>
+    input_schema:
+      question:
+        type: string
+        description: 質問内容
+    output_schema:
+      answer:
+        type: string
+        description: 詳細な調査結果
+      result:
+        type: boolean
+        description: 質問内容に対して的確な調査結果が得られたら true、そうでなければ false
+    config:
+      features:
+        web_search_request: true
+    mcp_servers:
+      arxiv:
+        command: uvx
+        args: ["arxiv-mcp-server", "--storage-path", ".agent/arxiv"]
+        enabled_tools:
+          - deep-paper-analysis
+          - download_paper
+          - list_papers
+          - read_paper
+          - search_papers
+
+  research_community:
+    description: |
+      質問内容について Zenn、Qiita、note、Medium、YouTube などのコミュニティ上の情報を調査して回答します。
+    instruction: |
+      {{.role}}
+      ユーザーの質問に対して Zenn、Qiita、note、Medium、YouTube などのコミュニティの情報を徹底的に調査して、調査結果を報告しなさい。
+
+      {{.research_rule}}
+
+      {{.instruction}}
+    prompt_template: |
+      <質問内容>
+      {{.question}}
+      </質問内容>
+    input_schema:
+      question:
+        type: string
+        description: 質問内容
+    output_schema:
+      answer:
+        type: string
+        description: 詳細な調査結果
+      result:
+        type: boolean
+        description: 質問内容に対して的確な調査結果が得られたら true、そうでなければ false
+    config:
+      features:
+        web_search_request: true
+
+  research_github:
+    description: |
+      質問内容について GitHub 上の情報を調査して回答します。
+    instruction: |
+      {{.role}}
+      ユーザーの質問に対して GitHub 上の情報を徹底的に調査して、調査結果を報告しなさい。
+
+      {{.research_rule}}
+
+      {{.instruction}}
+    prompt_template: |
+      <質問内容>
+      {{.question}}
+      </質問内容>
+    input_schema:
+      question:
+        type: string
+        description: 質問内容
+    output_schema:
+      answer:
+        type: string
+        description: 詳細な調査結果
+      result:
+        type: boolean
+        description: 質問内容に対して的確な調査結果が得られたら true、そうでなければ false
+    config:
+      features:
+        web_search_request: true
+    mcp_servers:
+      duckduckgo:
+        command: uvx
+        args: ["duckduckgo-mcp-server"]
+        enabled_tools:
+          - search
+          - fetch_content
+      deepwiki:
+        command: npx
+        args: ["mcp-remote", "https://mcp.deepwiki.com/sse"]
+        enabled_tools:
+          - ask_question
+          - read_wiki_contents
+          - read_wiki_structure
+
+  research_hackernews:
+    description: |
+      質問内容について Hackernews 上の情報を調査して回答します。
+    instruction: |
+      {{.role}}
+      ユーザーの質問に対して Hackernews の情報を徹底的に調査して、調査結果を報告しなさい。
+
+      {{.research_rule}}
+
+      {{.instruction}}
+    prompt_template: |
+      <質問内容>
+      {{.question}}
+      </質問内容>
+    input_schema:
+      question:
+        type: string
+        description: 質問内容
+    output_schema:
+      answer:
+        type: string
+        description: 詳細な調査結果
+      result:
+        type: boolean
+        description: 質問内容に対して的確な調査結果が得られたら true、そうでなければ false
+    config:
+      features:
+        web_search_request: true
+    mcp_servers:
+      hackernews:
+        command: uvx
+        args: ["mcp-hn"]
+        enabled_tools:
+          - get_stories
+          - get_story_info
+          - search_stories
+          - get_user_inf
+
+  research_reddit:
+    description: |
+      質問内容について Reddit 上の情報を調査して回答します。
+    instruction: |
+      {{.role}}
+      ユーザーの質問に対して Reddit 上の情報を徹底的に調査して、調査結果を報告しなさい。
+
+      {{.research_rule}}
+
+      {{.instruction}}
+    prompt_template: |
+      <質問内容>
+      {{.question}}
+      </質問内容>
+    input_schema:
+      question:
+        type: string
+        description: 質問内容
+    output_schema:
+      answer:
+        type: string
+        description: 詳細な調査結果
+      result:
+        type: boolean
+        description: 質問内容に対して的確な調査結果が得られたら true、そうでなければ false
+    config:
+      features:
+        web_search_request: true
+    mcp_servers:
+      reddit:
+        command: uvx
+        args: ["mcp-server-reddit"]
+        enabled_tools:
+          - get_frontpage_posts
+          - get_post_comments
+          - get_post_content
+          - get_subreddit_hot_posts
+          - get_subreddit_info
+          - get_subreddit_new_posts
+          - get_subreddit_rising_posts
+          - get_subreddit_top_post
+
+  research_web:
+    description: |
+      質問内容について Web 検索を行って詳細に調査して回答します。
+    instruction: |
+      {{.role}}
+      ユーザーの質問に対して Web 検索を行い徹底的に調査して、調査結果を報告しなさい。
+
+      {{.research_rule}}
+
+      {{.instruction}}
+    prompt_template: |
+      <質問内容>
+      {{.question}}
+      </質問内容>
+    input_schema:
+      question:
+        type: string
+        description: 質問内容
+    output_schema:
+      answer:
+        type: string
+        description: 詳細な調査結果
+      result:
+        type: boolean
+        description: 質問内容に対して的確な調査結果が得られたら true、そうでなければ false
+    config:
+      features:
+        web_search_request: true
