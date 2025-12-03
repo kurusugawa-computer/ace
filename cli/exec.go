@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/kurusugawa-computer/ace/app"
@@ -88,19 +87,6 @@ KEY=VALUE pairs can be used to fill prompt_template variables.`,
 				return fmt.Errorf("%w: %s", ErrUsage, err)
 			}
 
-			// コマンドライン引数をパースしてAIエージェントの入力データをつくる
-			input := map[string]any{}
-			for _, argument := range cmd.Args().Tail() {
-				segments := strings.SplitN(argument, "=", 2)
-				if len(segments) != 2 {
-					fmt.Fprintf(os.Stderr, "Invalid KEY=VALUE argument: %s\n", argument)
-					return fmt.Errorf("%w: %s", ErrUsage, err)
-				}
-				key := segments[0]
-				value := segments[1]
-				input[key] = value
-			}
-
 			// アプリケーションをつくり、AIエージェントを実行
 			app := app.New(
 				config,
@@ -109,7 +95,7 @@ KEY=VALUE pairs can be used to fill prompt_template variables.`,
 				app.WithLogger(os.Stderr, logLevel),
 			)
 			agentName := cmd.Args().First()
-			output, err := app.RunAgent(agentName, workdir, input)
+			output, err := app.RunAgent(agentName, workdir, cmd.Args().Tail())
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to start AI agent\n")
 				return fmt.Errorf("%w: %s", ErrInternal, err)
