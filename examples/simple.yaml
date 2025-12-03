@@ -1,3 +1,13 @@
+# usage:
+#    ace -c simple.yaml root question="質問内容"
+#
+# description:
+#   質問内容について、元気よく回答します。
+#
+# requirements:
+#  - codex にパスが通っていること
+#
+
 config:
   model_provider: openai
   model: gpt-5-mini
@@ -26,9 +36,7 @@ agents:
     description: |
       天気情報を調べます。
     instruction: |
-      以下のツールを使用して、天気情報を検索してユーザーの質問に回答しなさい。
-      - search
-      - fetch_content
+      天気情報を Web 検索してユーザーの質問に回答しなさい。
     prompt_template: |
       {{.location}} の {{.time}} の天気について Web 検索して回答しなさい。
     input_schema:
@@ -42,10 +50,6 @@ agents:
       result:
         type: string
         description: 天気情報
-    mcp_servers:
-      duckduckgo:
-        command: uvx
-        args: ["duckduckgo-mcp-server"]
-        enabled_tools:
-          - search
-          - fetch_content
+    config:
+      features:
+        web_search_request: true
