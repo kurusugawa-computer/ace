@@ -1,11 +1,11 @@
 # usage:
-#    ace -c simple.yaml root question="質問内容"
+#   ace -c simple.yaml root question="質問内容"
 #
 # description:
 #   質問内容について、元気よく回答します。
 #
 # requirements:
-#  - codex にパスが通っていること
+#   - codex にパスが通っていること
 #
 
 config:
