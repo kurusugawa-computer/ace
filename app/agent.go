@@ -49,7 +49,7 @@ func (app *App) RunAgent(agentName string, workdir string, arguments []string) (
 	// エージェントの実行
 	output, err := agent.Run(
 		workdir,
-		argumentsMap,
+		input,
 		&agents.RunConfig{
 			APIKey:                  app.apiKey,
 			SubagentMCPServerConfig: app.subAgentMCPServerConfig,
