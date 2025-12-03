@@ -2,7 +2,7 @@ version: "3"
 
 vars:
   CLI_NAME: ace
-  CLI_VERSION: v0.0.3
+  CLI_VERSION: v0.0.4
 
 tasks:
   build:
