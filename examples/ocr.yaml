@@ -1,0 +1,27 @@
+
+config:
+  model_provider: openai
+  model: gpt-5-nano
+  model_reasoning_effort: low
+  model_verbosity: low
+
+agents:
+  root:
+    description: |
+      文字起こしを行います。
+    instruction: |
+      指定された画像ファイルを読み取って文字起こしすること。
+    prompt_template: |
+      {{.file}} を読み取り文字起こししなさい。
+    input_schema:
+      file:
+        type: string
+        description: 画像ファイルのパス
+    output_schema:
+      result:
+        type: string
+        description: 文字起こし結果
+    approval_policy: untrusted
+    config:
+      features:
+        view_image_tool: true
