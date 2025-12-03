@@ -14,6 +14,11 @@ type Config struct {
 	// ここでは、YAML ファイルに定義されているすべての AI エージェントに適用する Config を指定する。
 	Config agents.CodexConfig `yaml:"config,omitempty"`
 
+	// 共通の変数
+	// 各 AI エージェントの description、instruction、prompt_template で
+	// {{.key}} の形式で値を展開できる。
+	Vars map[string]any `yaml:"vars,omitempty"`
+
 	// AI エージェントの定義
 	// Key がエージェントの名前であり、CLI の実行時に指定する AGENT_NAME であり、
 	// sub_agents で指定するサブエージェント名でもある。

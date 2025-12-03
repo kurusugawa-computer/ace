@@ -31,6 +31,17 @@ func (app *App) RunMCPServer(agentName string, workdir string) error {
 			OutputSchema: agent.OutputSchema,
 		},
 		func(ctx context.Context, request *mcp.CallToolRequest, input map[string]any) (*mcp.CallToolResult, any, error) {
+			// vars の値を展開する
+			if app.config.Vars != nil {
+				for key, value := range app.config.Vars {
+					if _, ok := input[key]; ok {
+						continue
+					}
+					input[key] = value
+				}
+			}
+
+			// エージェントの実行
 			output, err := agent.Run(
 				workdir,
 				input,

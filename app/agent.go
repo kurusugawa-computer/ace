@@ -19,14 +19,14 @@ func (app *App) RunAgent(agentName string, workdir string, arguments []string) (
 		return nil, err
 	}
 
-	// ["KEY=VALUE", "KEY=VALUE"...] 形式の arguments を map[string]any にパースする。
+	// ["KEY=VALUE", "KEY=VALUE"...] 形式の arguments を map[string]any にパースする
 	// ただし、この段階では value は string のまま。(KEYの階層構造のみをパース)
 	argumentsMap, err := parseArguments(arguments)
 	if err != nil {
 		return nil, err
 	}
 
-	// input_schema の定義に従って、arguments をパースする。
+	// input_schema の定義に従って、arguments をパースする
 	input := map[string]any{}
 	for propName, propSchema := range agent.InputSchema.Properties {
 		value, err := applyJSONSchema(propName, argumentsMap[propName], propSchema)
@@ -34,6 +34,16 @@ func (app *App) RunAgent(agentName string, workdir string, arguments []string) (
 			return nil, err
 		}
 		input[propName] = value
+	}
+
+	// vars の値を展開する
+	if app.config.Vars != nil {
+		for key, value := range app.config.Vars {
+			if _, ok := input[key]; ok {
+				continue
+			}
+			input[key] = value
+		}
 	}
 
 	// エージェントの実行

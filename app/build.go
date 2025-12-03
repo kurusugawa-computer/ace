@@ -2,6 +2,8 @@ package app
 
 import (
 	"errors"
+	"strings"
+	"text/template"
 
 	"github.com/kurusugawa-computer/ace/agents"
 )
@@ -57,11 +59,37 @@ func (app *App) buildAgent(agentName string) (*agents.Agent, error) {
 		})
 	}
 
+	// vars の値を適用
+	description := agentConfig.Description
+	instruction := agentConfig.Instruction
+	if app.config.Vars != nil {
+		descriptionTemplate, err := template.New("description").Parse(agentConfig.Description)
+		if err != nil {
+			return nil, err
+		}
+		descriptionBuilder := &strings.Builder{}
+		if err := descriptionTemplate.Execute(descriptionBuilder, app.config.Vars); err != nil {
+			return nil, err
+		}
+
+		instructionTemplate, err := template.New("instruction").Parse(agentConfig.Instruction)
+		if err != nil {
+			return nil, err
+		}
+		instructionBuilder := &strings.Builder{}
+		if err := instructionTemplate.Execute(instructionBuilder, app.config.Vars); err != nil {
+			return nil, err
+		}
+
+		description = descriptionBuilder.String()
+		instruction = instructionBuilder.String()
+	}
+
 	// エージェントのビルド
 	agent, err := agents.Build(&agents.Config{
 		Name:           agentConfig.Name,
-		Description:    agentConfig.Description,
-		Instruction:    agentConfig.Instruction,
+		Description:    description,
+		Instruction:    instruction,
 		PromptTemplate: agentConfig.PromptTemplate,
 		InputSchema:    agentConfig.InputSchema,
 		OutputSchema:   agentConfig.OutputSchema,
