@@ -122,3 +122,11 @@ mcp-server サブコマンドを実行すると、ACE を MCP Server（STDIO 形
 ```bash
 ace mcp-server -c example/simple.yaml root
 ```
+
+### プログラムからの利用
+
+以下のバインディングライブラリを利用できます。
+
+| プログラミング言語 | ライブラリ                                              |
+| ------------------ | ------------------------------------------------------- |
+| Golang             | [ace-go](https://github.com/kurusugawa-computer/ace-go) |
