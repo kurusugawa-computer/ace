@@ -16,7 +16,8 @@ type Config struct {
 
 	// 共通の変数
 	// 各 AI エージェントの description、instruction、prompt_template で
-	// {{.key}} の形式で値を展開できる。
+	// {{.KEY}} の形式で値を展開できる。
+	// 変数名は英大文字のスネークケースを推奨（input_schema の展開と区別するため）
 	Vars map[string]any `yaml:"vars,omitempty"`
 
 	// AI エージェントの定義

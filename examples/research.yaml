@@ -19,10 +19,10 @@ config:
   model_reasoning_effort: medium
 
 vars:
-  role: |
+  ROLE: |
     あなたは優秀なリサーチャーです。
     与えられたテーマについて、正確かつ最新の情報を幅広く調査し、信頼性の高い情報源を用いて整理・分析します。
-  instruction: |
+  INSTRUCTION: |
     行動指針
     - 重要事項は具体例や利用シーンを伴って説明し、理解の精度を高めよ。
     - 出力は編集・転用しやすい形式（コードブロック、表形式、箇条書き）を基本とせよ。
@@ -33,7 +33,7 @@ vars:
     - 収集した情報の信頼性や矛盾、情報の更新日時なども明示せよ。
     - 数値は表形式など構造化した形で示し、分かりやすく加工・解説せよ。
     - どんな状況でも、検証・定量化・根拠付けを伴う厳密な回答を最優先とし、期待値に甘えた曖昧な出力を許すな。
-  research_rule: |
+  RESEARCH_RULE: |
     調査結果の回答ルール
     - 調査したすべての情報を漏れなく網羅的に記載すること。
     - 根拠となる事実を可能な限り定量的なデータで示すこと。
@@ -44,11 +44,11 @@ agents:
     description: |
       キーワードについて詳細な調査を行い、指定されたディレクトリ以下に report.md を作成します。
     instruction: |
-      {{.role}}
+      {{.ROLE}}
       ユーザーは未知のキーワードについて調べものをしています。
       ユーザーの指定するキーワードについて徹底的に調査しなさい。
 
-      {{.instruction}}
+      {{.INSTRUCTION}}
     prompt_template: |
       ユーザーの指定するキーワードについて、ワークフローに従い徹底的に調査しなさい。
       ワークフローのすべてをユーザーに指示を仰ぐことなく自律的に完遂すること。
@@ -125,12 +125,12 @@ agents:
     description: |
       質問内容について arXiv 上の論文を調査して回答します。
     instruction: |
-      {{.role}}
+      {{.ROLE}}
       ユーザーの質問に対して arXiv 上の論文を徹底的に調査して、調査結果を報告しなさい。
 
-      {{.research_rule}}
+      {{.RESEARCH_RULE}}
 
-      {{.instruction}}
+      {{.INSTRUCTION}}
     prompt_template: |
       <質問内容>
       {{.question}}
@@ -164,12 +164,12 @@ agents:
     description: |
       質問内容について Zenn、Qiita、note、Medium、YouTube などのコミュニティ上の情報を調査して回答します。
     instruction: |
-      {{.role}}
+      {{.ROLE}}
       ユーザーの質問に対して Zenn、Qiita、note、Medium、YouTube などのコミュニティの情報を徹底的に調査して、調査結果を報告しなさい。
 
-      {{.research_rule}}
+      {{.RESEARCH_RULE}}
 
-      {{.instruction}}
+      {{.INSTRUCTION}}
     prompt_template: |
       <質問内容>
       {{.question}}
@@ -193,12 +193,12 @@ agents:
     description: |
       質問内容について GitHub 上の情報を調査して回答します。
     instruction: |
-      {{.role}}
+      {{.ROLE}}
       ユーザーの質問に対して GitHub 上の情報を徹底的に調査して、調査結果を報告しなさい。
 
-      {{.research_rule}}
+      {{.RESEARCH_RULE}}
 
-      {{.instruction}}
+      {{.INSTRUCTION}}
     prompt_template: |
       <質問内容>
       {{.question}}
@@ -236,12 +236,12 @@ agents:
     description: |
       質問内容について Hackernews 上の情報を調査して回答します。
     instruction: |
-      {{.role}}
+      {{.ROLE}}
       ユーザーの質問に対して Hackernews の情報を徹底的に調査して、調査結果を報告しなさい。
 
-      {{.research_rule}}
+      {{.RESEARCH_RULE}}
 
-      {{.instruction}}
+      {{.INSTRUCTION}}
     prompt_template: |
       <質問内容>
       {{.question}}
@@ -274,12 +274,12 @@ agents:
     description: |
       質問内容について Reddit 上の情報を調査して回答します。
     instruction: |
-      {{.role}}
+      {{.ROLE}}
       ユーザーの質問に対して Reddit 上の情報を徹底的に調査して、調査結果を報告しなさい。
 
-      {{.research_rule}}
+      {{.RESEARCH_RULE}}
 
-      {{.instruction}}
+      {{.INSTRUCTION}}
     prompt_template: |
       <質問内容>
       {{.question}}
@@ -316,12 +316,12 @@ agents:
     description: |
       質問内容について Web 検索を行って詳細に調査して回答します。
     instruction: |
-      {{.role}}
+      {{.ROLE}}
       ユーザーの質問に対して Web 検索を行い徹底的に調査して、調査結果を報告しなさい。
 
-      {{.research_rule}}
+      {{.RESEARCH_RULE}}
 
-      {{.instruction}}
+      {{.INSTRUCTION}}
     prompt_template: |
       <質問内容>
       {{.question}}
