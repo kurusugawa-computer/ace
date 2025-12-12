@@ -15,6 +15,6 @@ tasks:
           -ldflags "-s -w -X main.version={{.CLI_VERSION}}" \
           -output build/{{.CLI_NAME}}_{{`{{.OS}}`}}_{{`{{.Arch}}`}}/{{.CLI_NAME}}
         cd build
-        for dir in $(find -maxdepth 1 -type d -name "{{.CLI_NAME}}_*"); do
+        for dir in $(find -maxdepth 1 -type d -name "{{.CLI_NAME}}_*" -printf "%f\n"); do
           tar czf ${dir}.tar.gz ${dir}
         done
