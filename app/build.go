@@ -10,7 +10,7 @@ import (
 
 const DefaultApprovalPolicy = "never"
 const DefaultSandbox = "read-only"
-const DefaultTImeoutSec = 1800
+const DefaultTimeoutSec = 1800
 
 func (app *App) buildAgent(agentName string) (*agents.Agent, error) {
 	// エージェントのConfigを取得
@@ -51,7 +51,7 @@ func (app *App) buildAgent(agentName string) (*agents.Agent, error) {
 		}
 		timeoutSec := subAgentConfig.TimeoutSec
 		if timeoutSec == 0 {
-			timeoutSec = DefaultTImeoutSec
+			timeoutSec = DefaultTimeoutSec
 		}
 		subAgents = append(subAgents, &agents.SubAgentConfig{
 			Name:       subAgentConfig.Name,
