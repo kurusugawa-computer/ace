@@ -183,7 +183,7 @@ func applyJSONSchema(key string, value any, schema *jsonschema.Schema) (any, err
 				return nil, fmt.Errorf("missing required field specified in input_schema: %s", key)
 			}
 
-			var boolean float64
+			var boolean bool
 			if err := json.Unmarshal(schema.Default, &boolean); err != nil {
 				return nil, err
 			}
