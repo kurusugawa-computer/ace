@@ -55,8 +55,9 @@ func Build(config *Config) (*Agent, error) {
 		OutputSchema:   outputSchema,
 		ApprovalPolicy: config.ApprovalPolicy,
 		Sandbox:        config.Sandbox,
-		Config:         config.Config,
-		SubAgents:      subAgents,
+		Config:              config.Config,
+		UseBaseInstructions: config.UseBaseInstructions,
+		SubAgents:           subAgents,
 	}
 	return agent, nil
 }

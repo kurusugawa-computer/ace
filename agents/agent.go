@@ -16,6 +16,7 @@ type Agent struct {
 	ApprovalPolicy string
 	Sandbox        string
 	Config         CodexConfig
+	UseBaseInstructions bool
 	SubAgents      []*SubAgent
 }
 

@@ -37,6 +37,12 @@ func (app *App) buildAgent(agentName string) (*agents.Agent, error) {
 		sandbox = DefaultSandbox
 	}
 
+	// base instructions の送信可否
+	useBaseInstructions := true
+	if agentConfig.UseBaseInstructions != nil {
+		useBaseInstructions = *agentConfig.UseBaseInstructions
+	}
+
 	// MCP Servers の解決
 	for mcpServerName, mcpServerConfig := range agentConfig.MCPServers {
 		codexConfig["mcp_servers."+mcpServerName] = mcpServerConfig
@@ -95,8 +101,9 @@ func (app *App) buildAgent(agentName string) (*agents.Agent, error) {
 		OutputSchema:   agentConfig.OutputSchema,
 		ApprovalPolicy: approvalPolicy,
 		Sandbox:        sandbox,
-		Config:         codexConfig,
-		SubAgents:      subAgents,
+		Config:              codexConfig,
+		UseBaseInstructions: useBaseInstructions,
+		SubAgents:           subAgents,
 	})
 	if err != nil {
 		return nil, err

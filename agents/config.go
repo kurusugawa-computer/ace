@@ -16,6 +16,7 @@ type Config struct {
 	ApprovalPolicy string // untrusted, on-failure, never
 	Sandbox        string // read-only, workspace-write, danger-full-access
 	Config         CodexConfig
+	UseBaseInstructions bool
 	SubAgents      []*SubAgentConfig
 }
 

@@ -70,17 +70,24 @@ func (agent *Agent) Run(workdir string, input map[string]any, config *RunConfig)
 	}
 	instance := codex.New(options...)
 	ctx := context.Background()
-	if err := instance.Login(ctx, config.APIKey); err != nil {
-		return nil, err
+	if config.APIKey != "" {
+		if err := instance.Login(ctx, config.APIKey); err != nil {
+			return nil, err
+		}
 	}
-	answer, err := instance.Invoke(
-		ctx,
-		prompt.String(),
-		codex.WithBaseInstructions(agent.Instruction),
+	invokeOptions := []codex.InvokeOption{
 		codex.WithCwd(workdirAbsPath),
 		codex.WithApprovalPolicy(agent.ApprovalPolicy),
 		codex.WithSandbox(agent.Sandbox),
 		codex.WithConfig(codexConfig),
+	}
+	if agent.UseBaseInstructions {
+		invokeOptions = append(invokeOptions, codex.WithBaseInstructions(agent.Instruction))
+	}
+	answer, err := instance.Invoke(
+		ctx,
+		prompt.String(),
+		invokeOptions...,
 	)
 	if err != nil {
 		return nil, err

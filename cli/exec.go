@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/joho/godotenv"
 	"github.com/kurusugawa-computer/ace/app"
@@ -61,17 +60,17 @@ KEY=VALUE pairs can be used to fill prompt_template variables.`,
 			_ = godotenv.Load(envFiles...)
 			apiKey := os.Getenv("OPENAI_API_KEY")
 			if apiKey == "" {
-				credentials, err := credentials.Load(appName)
+				creds, err := credentials.Load(appName)
 				if err != nil {
 					if !errors.Is(err, os.ErrNotExist) {
 						fmt.Fprintf(os.Stderr, "Failed to load credentials file.\n")
 						return fmt.Errorf("%w: %s", ErrInternal, err)
 					}
-					fmt.Fprintf(os.Stderr, "The OpenAI API key is not set.\n")
-					fmt.Fprintf(os.Stderr, "Please specify the environment variable OPENAI_API_KEY or run the `%s setup` command.\n", filepath.Base(os.Args[0]))
-					return fmt.Errorf("%w: %s", ErrUsage, err)
+					fmt.Fprintf(os.Stderr, "OpenAI API key is not set. Falling back to Codex CLI auth state.\n")
+					apiKey = ""
+				} else {
+					apiKey = creds.OpenAIAPIKey
 				}
-				apiKey = credentials.OpenAIAPIKey
 			}
 
 			// エージェントを定義したYAMLファイルを読み込み

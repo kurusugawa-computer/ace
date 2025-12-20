@@ -54,11 +54,13 @@ func subAgentMCPServerConfig(configPath string, workdir string, apiKey string) f
 				workdirAbsPath,
 				subAgent.Name,
 			},
-			"env": map[string]any{
-				"OPENAI_API_KEY": apiKey,
-			},
 			"startup_timeout_sec": 30,
 			"tool_timeout_sec":    subAgent.TimeoutSec,
+		}
+		if apiKey != "" {
+			config["env"] = map[string]any{
+				"OPENAI_API_KEY": apiKey,
+			}
 		}
 
 		return config, nil
