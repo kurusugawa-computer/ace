@@ -7,6 +7,8 @@ import (
 )
 
 type Agent struct {
+	codexExecutablePath string
+
 	Name           string
 	Description    string
 	Instruction    string

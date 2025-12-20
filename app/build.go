@@ -86,18 +86,21 @@ func (app *App) buildAgent(agentName string) (*agents.Agent, error) {
 	}
 
 	// エージェントのビルド
-	agent, err := agents.Build(&agents.Config{
-		Name:           agentConfig.Name,
-		Description:    description,
-		Instruction:    instruction,
-		PromptTemplate: agentConfig.PromptTemplate,
-		InputSchema:    agentConfig.InputSchema,
-		OutputSchema:   agentConfig.OutputSchema,
-		ApprovalPolicy: approvalPolicy,
-		Sandbox:        sandbox,
-		Config:         codexConfig,
-		SubAgents:      subAgents,
-	})
+	agent, err := agents.Build(
+		app.codexExecutablePath,
+		&agents.Config{
+			Name:           agentConfig.Name,
+			Description:    description,
+			Instruction:    instruction,
+			PromptTemplate: agentConfig.PromptTemplate,
+			InputSchema:    agentConfig.InputSchema,
+			OutputSchema:   agentConfig.OutputSchema,
+			ApprovalPolicy: approvalPolicy,
+			Sandbox:        sandbox,
+			Config:         codexConfig,
+			SubAgents:      subAgents,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}

@@ -18,7 +18,7 @@ AI エージェントの定義がひとつの YAML ファイルで完結する�
 ### 必要環境
 
 ACE は内部的に OpenAI の Codex CLI を利用しています。  
-`codex` コマンドにパスが通っている必要があります。
+バージョン `0.53.0` 以上の Codex CLI が必要です。
 
 また、必要に応じて MCP Server の実行環境（npm や uv など）を用意してください。
 
@@ -29,11 +29,12 @@ ACE は内部的に OpenAI の Codex CLI を利用しています。
 
 ## Setup
 
-ACE の実行には **OpenAI API Key** が必要です。以下のいずれかの方法で設定してください。
+ACE の実行には **OpenAI API Key** または、**Codex CLI でのログイン** が必要です。以下のいずれかの方法で設定してください。
 
 - 環境変数 `OPENAI_API_KEY` を指定する
 - `.env` ファイルに API Key を記載する
 - `ace setup` コマンドを用いて対話的に設定する
+- `codex login` コマンドで Codex CLI でログインする
 
 ## Usage
 

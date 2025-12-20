@@ -6,7 +6,7 @@ import (
 	"github.com/google/jsonschema-go/jsonschema"
 )
 
-func Build(config *Config) (*Agent, error) {
+func Build(executablePath string, config *Config) (*Agent, error) {
 	// 入出力のスキーマ定義
 	inputSchema := &jsonschema.Schema{
 		Type:                 "object",
@@ -47,6 +47,7 @@ func Build(config *Config) (*Agent, error) {
 
 	// 構築したエージェントを返す
 	agent := &Agent{
+		codexExecutablePath: executablePath,
 		Name:           config.Name,
 		Description:    config.Description,
 		Instruction:    config.Instruction,

@@ -59,15 +59,26 @@ func (agent *Agent) Run(workdir string, input map[string]any, config *RunConfig)
 
 	// Codex を実行して回答を取得
 	var options []codex.CodexOption
+	if agent.codexExecutablePath != "" {
+		options = append(options, codex.WithExecutablePath(agent.codexExecutablePath))
+	}
 	if config.LogWriter != nil && config.LogLevel != "off" {
 		options = append(options, codex.WithLogger(config.LogWriter, config.LogLevel))
 	}
-	instance := codex.New(options...)
+	codexInstance := codex.New(options...)
 	ctx := context.Background()
-	if err := instance.Login(ctx, config.APIKey); err != nil {
+
+	loggedIn, err := codexInstance.IsLoggedIn(ctx)
+	if err != nil {
 		return nil, err
 	}
-	answer, err := instance.Invoke(
+	if !loggedIn {
+		if err := codexInstance.Login(ctx, config.APIKey); err != nil {
+			return nil, err
+		}
+	}
+
+	answer, err := codexInstance.Invoke(
 		ctx,
 		prompt.String(),
 		codex.WithDeveloperInstructions(agent.Instruction),

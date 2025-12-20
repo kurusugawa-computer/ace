@@ -8,6 +8,7 @@ import (
 
 type App struct {
 	config                  *Config
+	codexExecutablePath     string // Codex の実行パス
 	apiKey                  string
 	subAgentMCPServerConfig func(subAgent *agents.SubAgent) (map[string]any, error)
 
@@ -17,10 +18,11 @@ type App struct {
 
 type AppOption func(*App)
 
-func New(config *Config, apiKey string, subAgentMCPServerConfig func(subAgent *agents.SubAgent) (map[string]any, error), options ...AppOption) *App {
+func New(config *Config, codexExecutablePath string, apiKey string, subAgentMCPServerConfig func(subAgent *agents.SubAgent) (map[string]any, error), options ...AppOption) *App {
 	app := &App{
 		config:                  config,
-		apiKey:                  apiKey,
+		codexExecutablePath:     codexExecutablePath,
+		apiKey:                  apiKey, // codex login でログイン済みなら空文字列
 		subAgentMCPServerConfig: subAgentMCPServerConfig,
 	}
 

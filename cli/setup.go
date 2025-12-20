@@ -24,7 +24,7 @@ func setup(appName string, version string) *cli.Command {
 		Arguments: []cli.Argument{},
 		Action: func(aContext context.Context, aCommand *cli.Command) error {
 			// OpenAI の API Key を入力してもらう
-			openAIAPIKey, err := ReadPassword("input your OpenAI API key")
+			openAIAPIKey, err := ReadPassword("Enter your OpenAI API key")
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to read OpenAI API key.\n")
 				return fmt.Errorf("%w: %s", ErrInternal, err)

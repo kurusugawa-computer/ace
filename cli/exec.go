@@ -3,14 +3,10 @@ package cli
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 
-	"github.com/joho/godotenv"
 	"github.com/kurusugawa-computer/ace/app"
-	"github.com/kurusugawa-computer/ace/cli/credentials"
 	"github.com/urfave/cli/v3"
 )
 
@@ -42,6 +38,11 @@ KEY=VALUE pairs can be used to fill prompt_template variables.`,
 				Value: []string{".env"},
 			},
 			&cli.StringFlag{
+				Name:  "codex-path",
+				Usage: "set codex executable path",
+				Value: "codex",
+			},
+			&cli.StringFlag{
 				Name:        "log-level",
 				Usage:       "set log-level (\"error\", \"warn\", \"info\", \"debug\", \"trace\", \"off\", default: \"off\")",
 				HideDefault: true,
@@ -54,24 +55,13 @@ KEY=VALUE pairs can be used to fill prompt_template variables.`,
 			configPath := cmd.String("config")
 			workdir := cmd.String("workdir")
 			envFiles := cmd.StringSlice("env-file")
+			codexPath := cmd.String("codex-path")
 			logLevel := cmd.String("log-level")
 
 			// OpenAI の API Key を取得
-			// 優先順位：環境変数OPENAI_API_KEY > envfileオプションで指定された.envファイル > 設定ファイル
-			_ = godotenv.Load(envFiles...)
-			apiKey := os.Getenv("OPENAI_API_KEY")
-			if apiKey == "" {
-				credentials, err := credentials.Load(appName)
-				if err != nil {
-					if !errors.Is(err, os.ErrNotExist) {
-						fmt.Fprintf(os.Stderr, "Failed to load credentials file.\n")
-						return fmt.Errorf("%w: %s", ErrInternal, err)
-					}
-					fmt.Fprintf(os.Stderr, "The OpenAI API key is not set.\n")
-					fmt.Fprintf(os.Stderr, "Please specify the environment variable OPENAI_API_KEY or run the `%s setup` command.\n", filepath.Base(os.Args[0]))
-					return fmt.Errorf("%w: %s", ErrUsage, err)
-				}
-				apiKey = credentials.OpenAIAPIKey
+			apiKey, err := getAPIKey(ctx, appName, codexPath, envFiles)
+			if err != nil {
+				return err
 			}
 
 			// エージェントを定義したYAMLファイルを読み込み
@@ -90,8 +80,9 @@ KEY=VALUE pairs can be used to fill prompt_template variables.`,
 			// アプリケーションをつくり、AIエージェントを実行
 			app := app.New(
 				config,
+				codexPath,
 				apiKey,
-				subAgentMCPServerConfig(configPath, workdir, apiKey),
+				subAgentMCPServerConfig(configPath, workdir, codexPath, apiKey),
 				app.WithLogger(os.Stderr, logLevel),
 			)
 			agentName := cmd.Args().First()
