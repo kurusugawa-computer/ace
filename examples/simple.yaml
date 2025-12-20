@@ -10,7 +10,7 @@
 
 config:
   model_provider: openai
-  model: gpt-5.2-codex
+  model: gpt-5-mini
   model_reasoning_effort: low
   model_verbosity: low
 
