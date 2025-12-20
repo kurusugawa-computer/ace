@@ -39,6 +39,9 @@ func (agent *Agent) Run(workdir string, input map[string]any, config *RunConfig)
 		codexConfig["mcp_servers."+subAgent.Name] = mcpServerConfig
 	}
 
+	// AGENTS.md が存在しても見に行かないように制限
+	codexConfig["project_doc_max_bytes"] = 0
+
 	// プロンプトの構築
 	prompt := &strings.Builder{}
 	if err := agent.PromptTemplate.Execute(prompt, input); err != nil {
