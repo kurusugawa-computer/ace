@@ -9,7 +9,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/modelcontextprotocol/go-sdk v1.1.0
 	github.com/openai/openai-go/v3 v3.8.1
-	github.com/thamaji/codex-go v0.0.4
+	github.com/thamaji/codex-go v0.0.6
 	github.com/thamaji/files v0.1.0
 	github.com/thamaji/lazycrypto v0.0.0-20200110155536-0e2ba9cfb60c
 	github.com/urfave/cli/v3 v3.6.1

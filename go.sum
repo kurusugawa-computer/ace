@@ -20,8 +20,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/thamaji/codex-go v0.0.4 h1:fpu190UDh6HXOaX+NdRlJZW7oudwZ3VaskKoG9e2ug0=
-github.com/thamaji/codex-go v0.0.4/go.mod h1:C49//GNpSbf029kx0uOiwJkmcHHLNc0PMJcQ4AKONiI=
+github.com/thamaji/codex-go v0.0.6 h1:pLtWJsU+UHuG9aXyRkwAjfOvJhfsUFqqDo9Ona6fMHM=
+github.com/thamaji/codex-go v0.0.6/go.mod h1:C49//GNpSbf029kx0uOiwJkmcHHLNc0PMJcQ4AKONiI=
 github.com/thamaji/files v0.1.0 h1:XSWVgGMDvvIrzj2HqJBn/fMdvibIhrd4l7ly02z4JQo=
 github.com/thamaji/files v0.1.0/go.mod h1:I6ICA9GKEJ6biXzaQk+c3DJSZbXgPcuUw9DmjQgqkMM=
 github.com/thamaji/lazycrypto v0.0.0-20200110155536-0e2ba9cfb60c h1:cxrA2W9BJoNK3DRNzjsN687H6V6vnKVPBYboQHDTW3s=

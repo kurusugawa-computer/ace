@@ -45,22 +45,13 @@ func (agent *Agent) Run(workdir string, input map[string]any, config *RunConfig)
 		return nil, err
 	}
 
-	// TODO: これをやってしまうと、サブエージェントの利用を強制してしまう（必要がなくても使ってしまう）ことがある。やらないほうがよいかもしれない。要件等。いったんやらないでおく。
-	// プロンプトにサブエージェントを呼び出す指示を追加
-	// if len(agent.SubAgents) > 0 {
-	// 	fmt.Fprintln(prompt, "")
-	// 	for _, subAgent := range agent.SubAgents {
-	// 		fmt.Fprintln(prompt, "use "+subAgent.Name)
-	// 	}
-	// }
-
 	// プロンプトに出力形式の指定を追加
 	outputSchemaJSON, err := agent.OutputSchema.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
 	fmt.Fprintln(prompt, "")
-	fmt.Fprintln(prompt, "なお、出力形式は以下の JSON Schema に厳格に従うこと。")
+	fmt.Fprintln(prompt, "なお、回答の出力形式は以下の JSON Schema に厳格に従うこと。")
 	fmt.Fprintln(prompt, string(outputSchemaJSON))
 
 	// Codex を実行して回答を取得
@@ -76,7 +67,7 @@ func (agent *Agent) Run(workdir string, input map[string]any, config *RunConfig)
 	answer, err := instance.Invoke(
 		ctx,
 		prompt.String(),
-		codex.WithBaseInstructions(agent.Instruction),
+		codex.WithDeveloperInstructions(agent.Instruction),
 		codex.WithCwd(workdirAbsPath),
 		codex.WithApprovalPolicy(agent.ApprovalPolicy),
 		codex.WithSandbox(agent.Sandbox),
