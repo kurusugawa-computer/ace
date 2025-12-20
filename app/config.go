@@ -83,10 +83,6 @@ type AgentConfig struct {
 	// 詳細は https://github.com/openai/codex/blob/main/docs/config.md を参照。
 	// ここでは、この AI エージェントにのみ適用する Config を指定する。
 	Config agents.CodexConfig `yaml:"config,omitempty"`
-
-	// Codex の base instructions を送るかどうか
-	// デフォルトは true
-	UseBaseInstructions *bool `yaml:"use_base_instructions,omitempty"`
 }
 
 type MCPServerConfig map[string]any

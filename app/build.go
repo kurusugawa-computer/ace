@@ -39,8 +39,13 @@ func (app *App) buildAgent(agentName string) (*agents.Agent, error) {
 
 	// base instructions の送信可否
 	useBaseInstructions := true
-	if agentConfig.UseBaseInstructions != nil {
-		useBaseInstructions = *agentConfig.UseBaseInstructions
+	if value, ok := codexConfig["use_base_instructions"]; ok {
+		enabled, ok := value.(bool)
+		if !ok {
+			return nil, errors.New("use_base_instructions must be a boolean")
+		}
+		useBaseInstructions = enabled
+		delete(codexConfig, "use_base_instructions")
 	}
 
 	// MCP Servers の解決

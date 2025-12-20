@@ -12,6 +12,7 @@ config:
   model_provider: openai
   model: gpt-5.2-codex
   model_reasoning_effort: low
+  use_base_instructions: false
 
 agents:
   root:
@@ -19,7 +20,6 @@ agents:
       ユーザーの質問に回答します。
     instruction: |
       ユーザーの質問に対して元気よく回答すること。
-    use_base_instructions: false
     prompt_template: |
       {{.question}}
     input_schema:
@@ -37,7 +37,6 @@ agents:
       天気情報を調べます。
     instruction: |
       天気情報を Web 検索してユーザーの質問に回答しなさい。
-    use_base_instructions: false
     prompt_template: |
       {{.location}} の {{.time}} の天気について Web 検索して回答しなさい。
     input_schema:
